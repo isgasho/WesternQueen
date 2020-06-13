@@ -49,6 +49,12 @@ func main() {
 			"message": "setParameter success",
 		})
 	})
+	// only master
+	if util.IsMaster() {
+		r.GET("/finish", func(c *gin.Context) {
+
+		})
+	}
 
 	// 根据模式选择端口
 	switch util.Mode {

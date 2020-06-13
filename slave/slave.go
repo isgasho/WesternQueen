@@ -11,8 +11,18 @@ import (
 	"time"
 )
 
+// 全局缓存区
+var TraceCache util.TraceCache
+var TraceData util.TraceData
+
+func init() {
+	TraceData = make(util.TraceData)
+}
+
 // 开启运行
 func Start() {
+	go ReadShareWrongTraceData()
+
 	dataSourcePath := getDataSourcePath()
 	if dataSourcePath == "" {
 		fmt.Println("getDataSourcePath failed")
@@ -54,9 +64,47 @@ func Start() {
 			continue
 		}
 		tags := line[lastIndex : len(line)-1]
-		fmt.Println(string(traceId),string(tags))
+		if len(tags) > 0 {
+
+			TraceData[string(traceId)] = append(TraceData[string(traceId)], line)
+
+			//  判断表达式
+			if len(tags) > 8 {
+				if strings.Contains(string(tags), "error=1") ||
+					(strings.Contains(string(tags), "http.status_code=") &&
+						!strings.Contains(string(tags), "http.status_code=200")) {
+					go SendWrongTraceData(traceId, line)
+				}
+			}
+		}
+		// 达到开始批处理
+		if lineCount%util.ProcessBatchSize == 0 {
+
+			fmt.Println("get ProcessBatchSize", lineCount)
+		}
 	}
+
 	fmt.Println("finish used time: ", time.Since(beginTime))
+}
+
+// 处理程序
+func ProcessData() {
+
+}
+
+// 流写入错误信息
+func SendWrongTraceData(traceId []byte, line []byte) {
+
+}
+
+// 流写入出现错误的调用链
+func WriteTraceData(wrongTraceData util.TraceData) {
+
+}
+
+// 流读取错误信息
+func ReadShareWrongTraceData() {
+
 }
 
 func getDataSourcePath() string {
