@@ -126,3 +126,7 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 /WesternQueen
+/test/trace1_data.tar.gz
+/test/trace2_data.tar.gz
+/test/trace1.data
+/test/trace2.data
