@@ -6,4 +6,5 @@ type Span []byte      // just a line
 type SpanSlice []Span // some lines
 type TraceData map[string]SpanSlice
 
-type TraceCache []TraceData
+
+type TraceCache []string

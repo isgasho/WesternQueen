@@ -79,7 +79,10 @@ func Start() {
 		}
 		// 达到开始批处理
 		if lineCount%util.ProcessBatchSize == 0 {
-
+			// 判断是否存在于本地的错误表信息内
+			// 如果存在
+			SendTraceData()
+			// 否则 
 			fmt.Println("get ProcessBatchSize", lineCount)
 		}
 	}
@@ -98,7 +101,7 @@ func SendWrongTraceData(traceId []byte, line []byte) {
 }
 
 // 流写入出现错误的调用链
-func WriteTraceData(wrongTraceData util.TraceData) {
+func SendTraceData(wrongTraceData util.TraceData) {
 
 }
 
