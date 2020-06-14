@@ -5,7 +5,6 @@ package util
 var Mode string
 var DebugMode bool
 
-
 const (
 	SLAVE_ONE_MODE string = "slave1"
 	SLAVE_TWO_MODE string = "slave2"
@@ -23,7 +22,10 @@ const SLAVE_TWO_PORT_8002 = ":8002"
 // 程序运行参数
 
 // 批次处理大小
-const ProcessBatchSize = 20000
+const ProcessBatchSize = 25000
+
+// 同 traceID 出现位置
+const MaxSpanSplitSize = 20000
 
 // 外部传递
 

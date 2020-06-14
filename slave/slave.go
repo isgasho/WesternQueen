@@ -25,6 +25,7 @@ var WrongTraceSet mapset.Set
 
 func init() {
 	TraceData = make(util.TraceData)
+	TraceCache = make(util.TraceCache)
 	WrongTraceSet = mapset.NewSet()
 }
 
@@ -48,10 +49,11 @@ func Start() {
 	}
 	bufReader := bufio.NewReader(resp.Body)
 	// 开始拉取
-	var lineCount = 0
+	var lineCount int64
 	var beginTime = time.Now()
 
 	for {
+		// 按行读取 按行处理
 		line, err := bufReader.ReadBytes('\n')
 		if err != nil && err != io.EOF {
 			log.Println("bufReader.ReadBytes meet unsolved error")
@@ -76,7 +78,7 @@ func Start() {
 		if len(tags) > 0 {
 
 			TraceData[string(traceId)] = append(TraceData[string(traceId)], line)
-
+			TraceCache[string(traceId)] = lineCount
 			//  判断表达式
 			if len(tags) > 8 {
 				if strings.Contains(string(tags), "error=1") ||
@@ -89,14 +91,32 @@ func Start() {
 		// 达到开始批处理
 		if lineCount%util.ProcessBatchSize == 0 {
 			// 判断是否存在于本地的错误表信息内
-			// 如果存在上报
-
-			// 否则剔除内存数据
-			fmt.Println("get ProcessBatchSize", lineCount)
+			for traceId, index := range TraceCache {
+				pos := lineCount - index
+				if pos > util.MaxSpanSplitSize {
+					if findInWrongTraceSet(traceId) {
+						go SendTraceData(TraceData)
+						// TODO:后续如果再发现同 traceID 有误呢 ?
+						delete(TraceCache, traceId)
+						delete(TraceData, traceId)
+					} else {
+						delete(TraceCache, traceId)
+						delete(TraceData, traceId)
+					}
+				}
+			}
+			//fmt.Println("get ProcessBatchSize", lineCount)
 		}
 	}
 
 	fmt.Println("finish used time: ", time.Since(beginTime))
+}
+
+func findInWrongTraceSet(traceId string) bool {
+	if WrongTraceSet.Contains(traceId) {
+		return true
+	}
+	return false
 }
 
 // 写入错误信息

@@ -6,5 +6,5 @@ type Span []byte      // just a line
 type SpanSlice []Span // some lines
 type TraceData map[string]SpanSlice
 
-
-type TraceCache []string
+// 索引标记 最后一次出现的位置
+type TraceCache map[string]int64
