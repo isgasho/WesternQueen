@@ -4,9 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"github.com/arcosx/WesternQueen/master"
+	rpc "github.com/arcosx/WesternQueen/rpc"
 	"github.com/arcosx/WesternQueen/slave"
 	"github.com/arcosx/WesternQueen/util"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"log"
 )
 
 // 暴漏HTTP端口
@@ -14,8 +17,8 @@ var finalRunPort string
 
 func main() {
 	// 读取命令行参数判断是 slave 还是 master
-	flag.StringVar(&util.Mode, "mode", "SLAVE", "Run Mode")
-	flag.BoolVar(&util.DebugMode, "debug", false, "Debug Mode")
+	flag.StringVar(&util.Mode, "mode", "master", "Run Mode")
+	flag.BoolVar(&util.DebugMode, "debug", true, "Debug Mode")
 	flag.Parse()
 	fmt.Println("Run Mode is : ", util.Mode)
 	fmt.Println("Debug Mode : ", util.DebugMode)
@@ -39,21 +42,35 @@ func main() {
 		util.DATA_SOURCE_PORT = c.Query("port")
 		util.RESULT_UPLOAD_PORT = util.DATA_SOURCE_PORT
 		fmt.Println(fmt.Sprintf("%s receive parameters start running!", util.Mode))
-		if util.IsSlave() {
-			go slave.Start()
-		}
-		if util.IsMaster() {
-			go master.Start()
-		}
 		c.JSON(200, gin.H{
 			"message": "setParameter success",
 		})
+		if util.IsMaster() {
+			go master.Start()
+		}
+		if util.IsSlave() {
+			go slave.Start()
+		}
 	})
 	// only master
 	if util.IsMaster() {
+
 		r.GET("/finish", func(c *gin.Context) {
 
 		})
+
+		if util.DebugMode {
+			go master.Start()
+		}
+		// 初始化 RPC Service
+		go RPCService()
+	}
+	// only slave
+	if util.IsSlave() {
+		if util.DebugMode {
+			go slave.Start()
+		}
+		go RPCClient()
 	}
 
 	// 根据模式选择端口
@@ -67,4 +84,18 @@ func main() {
 
 	}
 	_ = r.Run(finalRunPort) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+}
+
+// 初始化RPC服务
+func RPCService() {
+	rpc.NewWesternQueenService(util.MASTER_PORT_8003)
+}
+
+func RPCClient() {
+	conn, err := grpc.Dial(fmt.Sprintf("http://localhost%s", util.MASTER_PORT_8003), grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	slave.RPCClient = rpc.NewWesternQueenClient(conn)
 }

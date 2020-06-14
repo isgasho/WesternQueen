@@ -2,8 +2,11 @@ package slave
 
 import (
 	"bufio"
+	"context"
 	"fmt"
+	"github.com/arcosx/WesternQueen/rpc"
 	"github.com/arcosx/WesternQueen/util"
+	mapset "github.com/deckarep/golang-set"
 	"io"
 	"log"
 	"net/http"
@@ -14,9 +17,15 @@ import (
 // 全局缓存区
 var TraceCache util.TraceCache
 var TraceData util.TraceData
+var RPCClient western_queen.WesternQueenClient
+
+// 全局变量
+// 全局错误traceID
+var WrongTraceSet mapset.Set
 
 func init() {
 	TraceData = make(util.TraceData)
+	WrongTraceSet = mapset.NewSet()
 }
 
 // 开启运行
@@ -73,16 +82,16 @@ func Start() {
 				if strings.Contains(string(tags), "error=1") ||
 					(strings.Contains(string(tags), "http.status_code=") &&
 						!strings.Contains(string(tags), "http.status_code=200")) {
-					go SendWrongTraceData(traceId, line)
+					go SendWrongTraceData(traceId)
 				}
 			}
 		}
 		// 达到开始批处理
 		if lineCount%util.ProcessBatchSize == 0 {
 			// 判断是否存在于本地的错误表信息内
-			// 如果存在
-			SendTraceData()
-			// 否则 
+			// 如果存在上报
+
+			// 否则剔除内存数据
 			fmt.Println("get ProcessBatchSize", lineCount)
 		}
 	}
@@ -90,14 +99,19 @@ func Start() {
 	fmt.Println("finish used time: ", time.Since(beginTime))
 }
 
-// 处理程序
-func ProcessData() {
+// 写入错误信息
+func SendWrongTraceData(traceId []byte) {
+	// 先写本地 再写主节点
+	WrongTraceSet.Add(string(traceId))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-}
-
-// 流写入错误信息
-func SendWrongTraceData(traceId []byte, line []byte) {
-
+	_, err := RPCClient.SendWrongTraceData(ctx, &western_queen.WrongTraceDataRequest{
+		TraceId: string(traceId),
+	})
+	if err != nil {
+		fmt.Println("RPCClient SendWrongTraceDataStream error", err)
+	}
 }
 
 // 流写入出现错误的调用链
@@ -107,7 +121,34 @@ func SendTraceData(wrongTraceData util.TraceData) {
 
 // 流读取错误信息
 func ReadShareWrongTraceData() {
+	d := time.Microsecond * 10
 
+	t := time.Tick(d)
+
+	fmt.Println("Read share wrong trace data from master !")
+	stream, err := RPCClient.ReadShareWrongTraceData(context.Background(), &western_queen.Empty{
+	})
+	if err != nil {
+		fmt.Println("ReadShareWrongTraceData error", err)
+	}
+	for {
+		<-t
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Println("ReadShareWrongTraceData stream Recv", err)
+		}
+		// 合并本地错误列表
+		// shit code !
+		tmp := make([]interface{}, len(resp.WrongTraceDataRequests))
+		for i, v := range resp.WrongTraceDataRequests {
+			tmp[i] = v
+		}
+		shareWrongTraceData := mapset.NewSetFromSlice(tmp)
+		WrongTraceSet.Union(shareWrongTraceData) // ? 这里一定需要 union 吗？
+	}
 }
 
 func getDataSourcePath() string {

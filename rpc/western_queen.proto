@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+
+service WesternQueen {
+    rpc SendWrongTraceData (WrongTraceDataRequest) returns (Empty) {
+    }
+    rpc ReadShareWrongTraceData (Empty) returns (stream ShareWrongTraceDataReturn) {
+    }
+
+}
+
+// slave to master write wrong trace data
+message WrongTraceDataRequest {
+    string traceId = 1;
+}
+
+// master to slave share wrong trace data
+message ShareWrongTraceDataReturn {
+    repeated string wrongTraceDataRequests = 1;
+}
+
+message Empty {
+
+}
