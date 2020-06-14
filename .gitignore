@@ -128,5 +128,5 @@ fabric.properties
 /WesternQueen
 /test/trace1_data.tar.gz
 /test/trace2_data.tar.gz
-/test/trace1.data
-/test/trace2.data
+/test/trace1.data*
+/test/trace2.data*

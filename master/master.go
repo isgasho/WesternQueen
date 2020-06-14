@@ -36,7 +36,7 @@ func Start() {
 
 	t := time.Tick(d)
 	for {
-		<- t
+		<-t
 		go fmt.Println(WrongTraceSet.Cardinality())
 	}
 }

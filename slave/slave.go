@@ -93,6 +93,7 @@ func Start() {
 			// 判断是否存在于本地的错误表信息内
 			for traceId, index := range TraceCache {
 				pos := lineCount - index
+				// 位置超越界限
 				if pos > util.MaxSpanSplitSize {
 					if findInWrongTraceSet(traceId) {
 						go SendTraceData(TraceData)
