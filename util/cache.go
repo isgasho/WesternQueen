@@ -8,3 +8,8 @@ type TraceData map[string]SpanSlice
 
 // 索引标记 最后一次出现的位置
 type TraceCache map[string]int64
+
+type TraceDataDim struct {
+	TraceId    string
+	SpanSlices SpanSlice
+}

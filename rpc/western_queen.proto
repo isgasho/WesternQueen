@@ -6,7 +6,9 @@ service WesternQueen {
     }
     rpc ReadShareWrongTraceData (Empty) returns (stream ShareWrongTraceDataReturn) {
     }
+    rpc SendTraceDataStream (stream TraceData) returns (Empty) {
 
+    }
 }
 
 // slave to master write wrong trace data
@@ -17,6 +19,11 @@ message WrongTraceDataRequest {
 // master to slave share wrong trace data
 message ShareWrongTraceDataReturn {
     repeated string wrongTraceDataRequests = 1;
+}
+
+message TraceData {
+    string traceId = 1;
+    repeated bytes spans = 2;
 }
 
 message Empty {

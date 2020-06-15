@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/arcosx/WesternQueen/master"
 	"google.golang.org/grpc"
+	"io"
 	"net"
 )
 
+// 本文件存放 RPC 的 Server 端实现
 type WesternQueenService struct {
 	UnimplementedWesternQueenServer
 }
@@ -38,5 +40,24 @@ func (w *WesternQueenService) ReadShareWrongTraceData(_ *Empty, server WesternQu
 		ShareWrongTraceDataReturn.WrongTraceDataRequests = master.GetWrongTraceSet()
 		server.Send(&ShareWrongTraceDataReturn)
 	}
+}
 
+func (w *WesternQueenService) SendTraceDataStream(stream WesternQueen_SendTraceDataStreamServer) error {
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+			panic(err)
+		}
+	}()
+
+	for {
+		request, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(new(Empty))
+		}
+		if request != nil {
+			master.ReceiveTraceData(request.TraceId, request.Spans)
+		}
+	}
 }

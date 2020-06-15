@@ -104,6 +104,53 @@ func (m *ShareWrongTraceDataReturn) GetWrongTraceDataRequests() []string {
 	return nil
 }
 
+type TraceData struct {
+	TraceId              string   `protobuf:"bytes,1,opt,name=traceId,proto3" json:"traceId,omitempty"`
+	Spans                [][]byte `protobuf:"bytes,2,rep,name=spans,proto3" json:"spans,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TraceData) Reset()         { *m = TraceData{} }
+func (m *TraceData) String() string { return proto.CompactTextString(m) }
+func (*TraceData) ProtoMessage()    {}
+func (*TraceData) Descriptor() ([]byte, []int) {
+	return fileDescriptor_567c35356db43e2a, []int{2}
+}
+
+func (m *TraceData) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TraceData.Unmarshal(m, b)
+}
+func (m *TraceData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TraceData.Marshal(b, m, deterministic)
+}
+func (m *TraceData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TraceData.Merge(m, src)
+}
+func (m *TraceData) XXX_Size() int {
+	return xxx_messageInfo_TraceData.Size(m)
+}
+func (m *TraceData) XXX_DiscardUnknown() {
+	xxx_messageInfo_TraceData.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TraceData proto.InternalMessageInfo
+
+func (m *TraceData) GetTraceId() string {
+	if m != nil {
+		return m.TraceId
+	}
+	return ""
+}
+
+func (m *TraceData) GetSpans() [][]byte {
+	if m != nil {
+		return m.Spans
+	}
+	return nil
+}
+
 type Empty struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -114,7 +161,7 @@ func (m *Empty) Reset()         { *m = Empty{} }
 func (m *Empty) String() string { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()    {}
 func (*Empty) Descriptor() ([]byte, []int) {
-	return fileDescriptor_567c35356db43e2a, []int{2}
+	return fileDescriptor_567c35356db43e2a, []int{3}
 }
 
 func (m *Empty) XXX_Unmarshal(b []byte) error {
@@ -138,6 +185,7 @@ var xxx_messageInfo_Empty proto.InternalMessageInfo
 func init() {
 	proto.RegisterType((*WrongTraceDataRequest)(nil), "WrongTraceDataRequest")
 	proto.RegisterType((*ShareWrongTraceDataReturn)(nil), "ShareWrongTraceDataReturn")
+	proto.RegisterType((*TraceData)(nil), "TraceData")
 	proto.RegisterType((*Empty)(nil), "Empty")
 }
 
@@ -146,20 +194,23 @@ func init() {
 }
 
 var fileDescriptor_567c35356db43e2a = []byte{
-	// 196 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x2f, 0x2a, 0x48, 0xd6,
-	0x2f, 0x4f, 0x2d, 0x2e, 0x49, 0x2d, 0xca, 0x8b, 0x2f, 0x2c, 0x4d, 0x4d, 0xcd, 0xd3, 0x2b, 0x28,
-	0xca, 0x2f, 0xc9, 0x57, 0x32, 0xe4, 0x12, 0x0d, 0x2f, 0xca, 0xcf, 0x4b, 0x0f, 0x29, 0x4a, 0x4c,
-	0x4e, 0x75, 0x49, 0x2c, 0x49, 0x0c, 0x4a, 0x2d, 0x2c, 0x4d, 0x2d, 0x2e, 0x11, 0x92, 0xe0, 0x62,
-	0x2f, 0x01, 0x89, 0x79, 0xa6, 0x48, 0x30, 0x2a, 0x30, 0x6a, 0x70, 0x06, 0xc1, 0xb8, 0x4a, 0xc1,
-	0x5c, 0x92, 0xc1, 0x19, 0x89, 0x45, 0xa9, 0xe8, 0xfa, 0x4a, 0x4a, 0x8b, 0xf2, 0x84, 0xcc, 0xb8,
-	0xc4, 0xca, 0xb1, 0x99, 0x57, 0x2c, 0xc1, 0xa8, 0xc0, 0xac, 0xc1, 0x19, 0x84, 0x43, 0x56, 0x89,
-	0x9d, 0x8b, 0xd5, 0x35, 0xb7, 0xa0, 0xa4, 0xd2, 0xa8, 0x93, 0x91, 0x8b, 0x27, 0x1c, 0xe2, 0xd0,
-	0x40, 0x90, 0x3b, 0x85, 0xcc, 0xb8, 0x84, 0x82, 0x53, 0xf3, 0x52, 0x50, 0x6d, 0x13, 0x12, 0xd3,
-	0xc3, 0xea, 0x6c, 0x29, 0x36, 0x3d, 0xb0, 0x31, 0x4a, 0x0c, 0x42, 0x8e, 0x5c, 0xe2, 0x41, 0xa9,
-	0x89, 0x29, 0x58, 0x9c, 0x2a, 0x04, 0x55, 0x24, 0x25, 0xa5, 0x87, 0xd3, 0x23, 0x4a, 0x0c, 0x06,
-	0x8c, 0x49, 0x6c, 0xe0, 0x30, 0x32, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x00, 0xf4, 0x64, 0xab,
-	0x3e, 0x01, 0x00, 0x00,
+	// 243 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0x3f, 0x4f, 0xc3, 0x30,
+	0x10, 0xc5, 0x6b, 0xaa, 0xb6, 0xca, 0xa9, 0xd3, 0x01, 0x6d, 0xc8, 0x14, 0x79, 0xca, 0x82, 0xf9,
+	0x27, 0x75, 0x61, 0x42, 0x82, 0x81, 0x11, 0x07, 0xa9, 0x23, 0x32, 0xcd, 0x09, 0x96, 0x3a, 0xe9,
+	0xf9, 0xa2, 0x8a, 0x6f, 0xc6, 0xc7, 0x43, 0x69, 0x20, 0x08, 0x94, 0x8c, 0xf7, 0x9e, 0xfd, 0x9e,
+	0x7f, 0x3e, 0x58, 0x72, 0xb5, 0xb9, 0xd8, 0x53, 0x10, 0x62, 0xff, 0xb2, 0xab, 0x89, 0xbc, 0xa9,
+	0xb8, 0x94, 0x52, 0x5f, 0xc1, 0xe9, 0x9a, 0x4b, 0xff, 0xf6, 0xcc, 0x6e, 0x43, 0xf7, 0x4e, 0x9c,
+	0xa5, 0x5d, 0x4d, 0x41, 0x30, 0x86, 0x99, 0x34, 0xda, 0x63, 0x11, 0xab, 0x54, 0x65, 0x91, 0xfd,
+	0x19, 0x75, 0x0e, 0x67, 0xf9, 0xbb, 0x63, 0xfa, 0x7f, 0x4f, 0x6a, 0xf6, 0xb8, 0x82, 0xc5, 0xbe,
+	0x2f, 0x2f, 0xc4, 0x2a, 0x1d, 0x67, 0x91, 0x1d, 0x70, 0xf5, 0x2d, 0x44, 0x9d, 0x38, 0xdc, 0x8d,
+	0x27, 0x30, 0x09, 0x95, 0xf3, 0x21, 0x3e, 0x4a, 0xc7, 0xd9, 0xdc, 0xb6, 0x83, 0x9e, 0xc1, 0xe4,
+	0x61, 0x5b, 0xc9, 0xc7, 0xf5, 0xa7, 0x82, 0xf9, 0xba, 0xa5, 0x7c, 0x6a, 0x20, 0x71, 0x05, 0x98,
+	0x93, 0x2f, 0xfe, 0x3e, 0x15, 0x17, 0xa6, 0x97, 0x39, 0x99, 0x9a, 0x43, 0x8c, 0x1e, 0xe1, 0x1d,
+	0x2c, 0x2d, 0xb9, 0xa2, 0x87, 0x13, 0xbf, 0x0f, 0x25, 0x89, 0x19, 0xfc, 0x05, 0x3d, 0xba, 0x54,
+	0x78, 0x0e, 0xc7, 0x4d, 0x75, 0x67, 0xe5, 0xc2, 0xe4, 0xb6, 0x08, 0xa6, 0x53, 0x7e, 0xfb, 0x32,
+	0xf5, 0x3a, 0x3d, 0xec, 0xe3, 0xe6, 0x2b, 0x00, 0x00, 0xff, 0xff, 0xf9, 0x2e, 0x5d, 0xfc, 0xaa,
+	0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -176,6 +227,7 @@ const _ = grpc.SupportPackageIsVersion6
 type WesternQueenClient interface {
 	SendWrongTraceData(ctx context.Context, in *WrongTraceDataRequest, opts ...grpc.CallOption) (*Empty, error)
 	ReadShareWrongTraceData(ctx context.Context, in *Empty, opts ...grpc.CallOption) (WesternQueen_ReadShareWrongTraceDataClient, error)
+	SendTraceDataStream(ctx context.Context, opts ...grpc.CallOption) (WesternQueen_SendTraceDataStreamClient, error)
 }
 
 type westernQueenClient struct {
@@ -227,10 +279,45 @@ func (x *westernQueenReadShareWrongTraceDataClient) Recv() (*ShareWrongTraceData
 	return m, nil
 }
 
+func (c *westernQueenClient) SendTraceDataStream(ctx context.Context, opts ...grpc.CallOption) (WesternQueen_SendTraceDataStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_WesternQueen_serviceDesc.Streams[1], "/WesternQueen/SendTraceDataStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &westernQueenSendTraceDataStreamClient{stream}
+	return x, nil
+}
+
+type WesternQueen_SendTraceDataStreamClient interface {
+	Send(*TraceData) error
+	CloseAndRecv() (*Empty, error)
+	grpc.ClientStream
+}
+
+type westernQueenSendTraceDataStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *westernQueenSendTraceDataStreamClient) Send(m *TraceData) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *westernQueenSendTraceDataStreamClient) CloseAndRecv() (*Empty, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Empty)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // WesternQueenServer is the server API for WesternQueen service.
 type WesternQueenServer interface {
 	SendWrongTraceData(context.Context, *WrongTraceDataRequest) (*Empty, error)
 	ReadShareWrongTraceData(*Empty, WesternQueen_ReadShareWrongTraceDataServer) error
+	SendTraceDataStream(WesternQueen_SendTraceDataStreamServer) error
 }
 
 // UnimplementedWesternQueenServer can be embedded to have forward compatible implementations.
@@ -242,6 +329,9 @@ func (*UnimplementedWesternQueenServer) SendWrongTraceData(ctx context.Context, 
 }
 func (*UnimplementedWesternQueenServer) ReadShareWrongTraceData(req *Empty, srv WesternQueen_ReadShareWrongTraceDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method ReadShareWrongTraceData not implemented")
+}
+func (*UnimplementedWesternQueenServer) SendTraceDataStream(srv WesternQueen_SendTraceDataStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendTraceDataStream not implemented")
 }
 
 func RegisterWesternQueenServer(s *grpc.Server, srv WesternQueenServer) {
@@ -287,6 +377,32 @@ func (x *westernQueenReadShareWrongTraceDataServer) Send(m *ShareWrongTraceDataR
 	return x.ServerStream.SendMsg(m)
 }
 
+func _WesternQueen_SendTraceDataStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(WesternQueenServer).SendTraceDataStream(&westernQueenSendTraceDataStreamServer{stream})
+}
+
+type WesternQueen_SendTraceDataStreamServer interface {
+	SendAndClose(*Empty) error
+	Recv() (*TraceData, error)
+	grpc.ServerStream
+}
+
+type westernQueenSendTraceDataStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *westernQueenSendTraceDataStreamServer) SendAndClose(m *Empty) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *westernQueenSendTraceDataStreamServer) Recv() (*TraceData, error) {
+	m := new(TraceData)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _WesternQueen_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "WesternQueen",
 	HandlerType: (*WesternQueenServer)(nil),
@@ -301,6 +417,11 @@ var _WesternQueen_serviceDesc = grpc.ServiceDesc{
 			StreamName:    "ReadShareWrongTraceData",
 			Handler:       _WesternQueen_ReadShareWrongTraceData_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "SendTraceDataStream",
+			Handler:       _WesternQueen_SendTraceDataStream_Handler,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "rpc/western_queen.proto",

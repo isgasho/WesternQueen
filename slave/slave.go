@@ -19,6 +19,12 @@ var TraceCache util.TraceCache
 var TraceData util.TraceData
 var RPCClient western_queen.WesternQueenClient
 
+// 发送chan
+var SendTraceDataCh chan util.TraceDataDim
+
+// 完成标志符
+var finishFlag bool
+
 // 全局变量
 // 全局错误traceID
 var WrongTraceSet mapset.Set
@@ -26,13 +32,17 @@ var WrongTraceSet mapset.Set
 func init() {
 	TraceData = make(util.TraceData)
 	TraceCache = make(util.TraceCache)
+	SendTraceDataCh = make(chan util.TraceDataDim)
 	WrongTraceSet = mapset.NewSet()
+	finishFlag = false
 }
 
 // 开启运行
 func Start() {
+	// 同步错误traceID 队列
 	go ReadShareWrongTraceData()
-
+	// 发送 trace 数据队列
+	go SendTraceData()
 	dataSourcePath := getDataSourcePath()
 	if dataSourcePath == "" {
 		fmt.Println("getDataSourcePath failed")
@@ -90,13 +100,15 @@ func Start() {
 		}
 		// 达到开始批处理
 		if lineCount%util.ProcessBatchSize == 0 {
-			// 判断是否存在于本地的错误表信息内
 			for traceId, index := range TraceCache {
 				pos := lineCount - index
 				// 位置超越界限
 				if pos > util.MaxSpanSplitSize {
 					if findInWrongTraceSet(traceId) {
-						go SendTraceData(TraceData)
+						var traceDataDim util.TraceDataDim
+						traceDataDim.TraceId = traceId
+						traceDataDim.SpanSlices = TraceData[traceId]
+						SendTraceDataCh <- traceDataDim
 						// TODO:后续如果再发现同 traceID 有误呢 ?
 						delete(TraceCache, traceId)
 						delete(TraceData, traceId)
@@ -106,10 +118,10 @@ func Start() {
 					}
 				}
 			}
-			//fmt.Println("get ProcessBatchSize", lineCount)
 		}
 	}
-
+	finishFlag = true
+	close(SendTraceDataCh)
 	fmt.Println("finish used time: ", time.Since(beginTime))
 }
 
@@ -136,8 +148,27 @@ func SendWrongTraceData(traceId []byte) {
 }
 
 // 流写入出现错误的调用链
-func SendTraceData(wrongTraceData util.TraceData) {
+func SendTraceData() {
+	stream, err := RPCClient.SendTraceDataStream(context.Background())
+	if err != nil {
+		fmt.Println("SendTraceData error", err)
+	}
+	for {
+		if !finishFlag {
+			tmp := <-SendTraceDataCh
+			sliceBytes := make([][]byte, len(tmp.SpanSlices))
+			for k, v := range tmp.SpanSlices {
+				sliceBytes[k] = v
+			}
+			stream.Send(&western_queen.TraceData{
+				TraceId: tmp.TraceId,
+				Spans:   sliceBytes,
+			})
+		} else {
+			stream.CloseSend()
+		}
 
+	}
 }
 
 // 流读取错误信息
