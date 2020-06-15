@@ -22,7 +22,7 @@ const SLAVE_TWO_PORT_8002 = ":8002"
 // 程序运行参数
 
 // 批次处理大小
-const ProcessBatchSize = 10
+const ProcessBatchSize = 25000
 
 // 同 traceID 出现位置
 const MaxSpanSplitSize = 20000

@@ -56,7 +56,10 @@ func main() {
 	if util.IsMaster() {
 
 		r.GET("/finish", func(c *gin.Context) {
-
+			master.Finish(c.Query("node"))
+			c.JSON(200, gin.H{
+				"message": "finish",
+			})
 		})
 
 		if util.DebugMode {

@@ -13,8 +13,10 @@ func init() {
 	util.Mode = "slave1"
 
 }
+
+// 单机调试使用此方法
 func TestStart(t *testing.T) {
-	conn, err := grpc.Dial("localhost:8003", grpc.WithInsecure(),grpc.WithBlock())
+	conn, err := grpc.Dial("localhost:8003", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

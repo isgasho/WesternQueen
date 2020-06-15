@@ -18,3 +18,4 @@ func IsMaster() bool {
 	}
 	return false
 }
+

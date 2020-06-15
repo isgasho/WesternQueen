@@ -8,6 +8,7 @@ import (
 	"github.com/arcosx/WesternQueen/util"
 	mapset "github.com/deckarep/golang-set"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -22,9 +23,6 @@ var RPCClient western_queen.WesternQueenClient
 // 发送chan
 var SendTraceDataCh chan util.TraceDataDim
 
-// 完成标志符
-var finishFlag bool
-
 // 全局变量
 // 全局错误traceID
 var WrongTraceSet mapset.Set
@@ -34,7 +32,6 @@ func init() {
 	TraceCache = make(util.TraceCache)
 	SendTraceDataCh = make(chan util.TraceDataDim)
 	WrongTraceSet = mapset.NewSet()
-	finishFlag = false
 }
 
 // 开启运行
@@ -99,6 +96,7 @@ func Start() {
 			}
 		}
 		// 达到开始批处理
+		// TODO:提高处理吞吐
 		if lineCount%util.ProcessBatchSize == 0 {
 			for traceId, index := range TraceCache {
 				pos := lineCount - index
@@ -120,9 +118,9 @@ func Start() {
 			}
 		}
 	}
-	finishFlag = true
 	close(SendTraceDataCh)
 	fmt.Println("finish used time: ", time.Since(beginTime))
+	go SendFinish()
 }
 
 func findInWrongTraceSet(traceId string) bool {
@@ -154,19 +152,15 @@ func SendTraceData() {
 		fmt.Println("SendTraceData error", err)
 	}
 	for {
-		if !finishFlag {
-			tmp := <-SendTraceDataCh
-			sliceBytes := make([][]byte, len(tmp.SpanSlices))
-			for k, v := range tmp.SpanSlices {
-				sliceBytes[k] = v
-			}
-			stream.Send(&western_queen.TraceData{
-				TraceId: tmp.TraceId,
-				Spans:   sliceBytes,
-			})
-		} else {
-			stream.CloseSend()
+		tmp := <-SendTraceDataCh
+		sliceBytes := make([][]byte, len(tmp.SpanSlices))
+		for k, v := range tmp.SpanSlices {
+			sliceBytes[k] = v
 		}
+		stream.Send(&western_queen.TraceData{
+			TraceId: tmp.TraceId,
+			Spans:   sliceBytes,
+		})
 
 	}
 }
@@ -214,4 +208,19 @@ func getDataSourcePath() string {
 		return fmt.Sprintf("http://localhost:%s/trace2.data", util.DATA_SOURCE_PORT)
 	}
 	return ""
+}
+
+func SendFinish() {
+	resp, err := http.Get(fmt.Sprintf("http://localhost:%s/finish?node=%s", util.MASTER_PORT_8002, util.Mode))
+	if err != nil {
+		fmt.Println("SendFinish error", err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("SendFinish error", err)
+	}
+
+	fmt.Println(string(body))
 }
