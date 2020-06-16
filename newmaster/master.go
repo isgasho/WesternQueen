@@ -94,7 +94,7 @@ func LastFinish() {
 		sort.Sort(traceData[traceId])
 		md5Hash.Reset()
 		for span := range traceData[traceId] {
-			md5Hash.Write([]byte(traceData[traceId][span]))
+			md5Hash.Write(util.Str2bytes(traceData[traceId][span]))
 		}
 		digest := md5Hash.Sum([]byte{})
 		traceMd5Map[traceId] = fmt.Sprintf("%x", digest)

@@ -69,14 +69,15 @@ func Start() {
 				if len(line) == 0 && err == io.EOF {
 					break
 				}
-				firstIndex := strings.Index(string(line), "|")
+				linsStr := util.Bytes2str(line)
+				firstIndex := strings.Index(linsStr, "|")
 				if firstIndex == -1 {
 					continue
 				}
 				traceId := line[:firstIndex]
 
 				//获得 tags
-				lastIndex := strings.LastIndex(string(line), "|")
+				lastIndex := strings.LastIndex(linsStr, "|")
 				if lastIndex == -1 {
 					continue
 				}
@@ -84,11 +85,11 @@ func Start() {
 				if len(tags) > 0 {
 					//  判断表达式
 					if len(tags) > 8 {
-						str := string(tags)
+						str := util.Bytes2str(tags)
 						if strings.Contains(str, "error=1") ||
 							(strings.Contains(str, "http.status_code=") &&
 								!strings.Contains(str, "http.status_code=200")) {
-							go WrongTraceSet.Add(string(traceId))
+							go WrongTraceSet.Add(util.Bytes2str(traceId))
 						}
 					}
 				}
@@ -147,14 +148,14 @@ func again() {
 				if len(line) == 0 && err == io.EOF {
 					break
 				}
-				lineStr := string(line)
+				lineStr := util.Bytes2str(line)
 				firstIndex := strings.Index(lineStr, "|")
 				if firstIndex == -1 {
 					continue
 				}
 				traceId := line[:firstIndex]
 				// 在错误集中找到
-				_, ok := WrongTraceMap.Load(string(traceId))
+				_, ok := WrongTraceMap.Load(util.Bytes2str(traceId))
 				if ok {
 					FullTraceSet.Add(lineStr)
 				}
