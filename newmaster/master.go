@@ -154,13 +154,13 @@ func sendMd5Result() bool {
 	result, _ := json.Marshal(traceMd5Map)
 	data := make(url.Values)
 	data.Add("result", util.Bytes2str(result))
-	resp, err := http.PostForm(fmt.Sprintf("http://localhost:%s/api/finished", util.RESULT_UPLOAD_PORT), data)
+	url := fmt.Sprintf("http://localhost:%s/api/finished", util.RESULT_UPLOAD_PORT)
+	resp, err := http.PostForm(url, data)
 	if err == nil {
 		defer resp.Body.Close()
 	} else {
 		log.Fatalln(err)
 	}
-
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		//log.Println("suc to sendCheckSum, result:" + util.Bytes2str(result))
 		return true

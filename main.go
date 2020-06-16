@@ -22,7 +22,7 @@ var finalRunPort string
 
 func main() {
 	// 读取环境变量判断是 slave 还是 master
-	envPort := os.Getenv("server.port")
+	envPort := os.Getenv("SERVER_PORT")
 	if envPort == "8000" {
 		util.Mode = util.SLAVE_ONE_MODE
 	} else if envPort == "8001" {

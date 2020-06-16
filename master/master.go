@@ -119,7 +119,10 @@ func sendMd5Result() bool {
 	result, _ := json.Marshal(traceMd5Map)
 	data := make(url.Values)
 	data.Add("result", util.Bytes2str(result))
-	resp, err := http.PostForm(fmt.Sprintf("http://localhost:%s/api/finished", util.RESULT_UPLOAD_PORT), data)
+	url := fmt.Sprintf("http://localhost:%s/api/finished", util.RESULT_UPLOAD_PORT)
+	fmt.Println("sendMd5Result url:", url)
+	fmt.Println("sendMd5Result ", data)
+	resp, err := http.PostForm(url, data)
 	if err == nil {
 		defer resp.Body.Close()
 	} else {

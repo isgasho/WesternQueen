@@ -28,6 +28,7 @@
 ## Docker测评命令
 
 ```bash
+  docker rm -f scoring backendprocess clientprocess2 clientprocess1
   docker login -u a2osdocker@1443039390876007 -p a2osdocker registry.cn-hangzhou.aliyuncs.com
   docker pull registry.cn-hangzhou.aliyuncs.com/a2os/tianchi:1.0
   docker run --rm -it  --net host -e "SERVER_PORT=8000" --name "clientprocess1" -d registry.cn-hangzhou.aliyuncs.com/a2os/tianchi:1.0
