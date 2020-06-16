@@ -30,7 +30,7 @@ func main() {
 	} else {
 		util.Mode = util.MASTER_MODE
 	}
-	flag.BoolVar(&util.DebugMode, "debug", true, "Debug Mode")
+	flag.BoolVar(&util.DebugMode, "debug", false, "Debug Mode")
 	flag.Parse()
 	fmt.Println("Run Mode is : ", util.Mode)
 	fmt.Println("Debug Mode : ", util.DebugMode)

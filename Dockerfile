@@ -2,7 +2,7 @@ FROM golang:alpine AS builder
 
 # Set necessary environmet variables needed for our image
 ENV GO111MODULE=on \
-    CGO_ENABLED=1  \
+    CGO_ENABLED=0  \
     GOARCH="amd64" \
     GOOS=linux   \
     GOPROXY=https://goproxy.cn,direct
@@ -32,5 +32,5 @@ FROM scratch
 
 COPY --from=builder /dist/main /
 
-# Command to run
+# Command to rund
 ENTRYPOINT ["/main"]
