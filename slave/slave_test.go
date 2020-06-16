@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -35,7 +36,7 @@ func TestStart(t *testing.T) {
 }
 
 func TestGetFile(t *testing.T)  {
-
+	runtime.GOMAXPROCS(4)
 	var beginTime = time.Now()
 	res, _ := http.Head("http://localhost:9971/trace1.data1"); // 187 MB file of random numbers per line
 	maps := res.Header
@@ -74,7 +75,7 @@ func TestGetFile(t *testing.T)  {
 				if firstIndex == -1 {
 					continue
 				}
-				traceId := line[:firstIndex]
+				_ = line[:firstIndex]
 
 				//获得 tags
 				lastIndex := strings.LastIndex(string(line), "|")
@@ -85,10 +86,11 @@ func TestGetFile(t *testing.T)  {
 				if len(tags) > 0 {
 					//  判断表达式
 					if len(tags) > 8 {
-						if strings.Contains(string(tags), "error=1") ||
-							(strings.Contains(string(tags), "http.status_code=") &&
-								!strings.Contains(string(tags), "http.status_code=200")) {
-							fmt.Println(traceId)
+						str := string(tags)
+						if strings.Contains(str, "error=1") ||
+							(strings.Contains(str, "http.status_code=") &&
+								!strings.Contains(str, "http.status_code=200")) {
+							//fmt.Println(traceId)
 						}
 					}
 				}

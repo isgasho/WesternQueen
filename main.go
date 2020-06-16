@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/arcosx/WesternQueen/master"
+	"github.com/arcosx/WesternQueen/newmaster"
+	"github.com/arcosx/WesternQueen/newslave"
 	rpc "github.com/arcosx/WesternQueen/rpc"
 	"github.com/arcosx/WesternQueen/slave"
 	"github.com/arcosx/WesternQueen/util"
@@ -19,7 +21,7 @@ import (
 var finalRunPort string
 
 func main() {
-	// 读取命令行参数判断是 slave 还是 master
+	// 读取环境变量判断是 slave 还是 master
 	envPort := os.Getenv("server.port")
 	if envPort == "8000" {
 		util.Mode = util.SLAVE_ONE_MODE
@@ -32,14 +34,7 @@ func main() {
 	flag.Parse()
 	fmt.Println("Run Mode is : ", util.Mode)
 	fmt.Println("Debug Mode : ", util.DebugMode)
-	// 初始化 RPC
-	// only slave
-	if util.IsMaster() {
-		go RPCService()
-	}
-	if util.IsSlave() {
-		RPCClient()
-	}
+
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -63,25 +58,65 @@ func main() {
 		c.JSON(200, gin.H{
 			"message": "setParameter success",
 		})
+		// 从节点开始！
 		if util.IsSlave() {
-			go slave.Start()
+			go newslave.Start()
 		}
 	})
-	// only master
-	if util.IsMaster() {
 
-		r.GET("/finish", func(c *gin.Context) {
-			master.Finish(c.Query("node"))
+	if util.IsMaster() {
+		// master 获取 slave 传递的错误ID
+		r.POST("/getWrong", func(c *gin.Context) {
+			bytes, _ := c.GetRawData()
+			var WrongTraceList []string
+			err := json.Unmarshal(bytes, &WrongTraceList)
+			if err != nil {
+				fmt.Println("json parse error", err)
+				c.JSON(500, gin.H{
+					"message": "data error",
+				})
+			}
+			go newmaster.GetWrongTraceList(WrongTraceList, c.Query("node"))
 			c.JSON(200, gin.H{
-				"message": "finish",
+				"message": "fuck you slave",
+			})
+		})
+		// master 获取 slave 传递的全量数据
+		r.POST("/all", func(c *gin.Context) {
+			bytes, _ := c.GetRawData()
+			var traceList []string
+			err := json.Unmarshal(bytes, &traceList)
+			if err != nil {
+				fmt.Println("json parse error", err)
+				c.JSON(500, gin.H{
+					"message": "data error",
+				})
+			}
+			go newmaster.GetAllTraceList(traceList, c.Query("node"))
+			c.JSON(200, gin.H{
+				"message": "fuck you slave",
 			})
 		})
 
-		if util.DebugMode {
-			go master.Start()
-		}
 	}
-
+	if util.IsSlave() {
+		// slave 获取 master 发送的共享错误traceID
+		r.POST("/getShare", func(c *gin.Context) {
+			bytes, _ := c.GetRawData()
+			var WrongTraceList []string
+			err := json.Unmarshal(bytes, &WrongTraceList)
+			if err != nil {
+				fmt.Println("json parse error", err)
+				c.JSON(500, gin.H{
+					"message": "data error",
+				})
+			}
+			go newslave.GetShareWrongTraceSet(WrongTraceList)
+			c.JSON(200, gin.H{
+				"message": "fuck you master",
+			})
+		})
+	}
 	// 根据模式选择端口
 	switch util.Mode {
 	case util.MASTER_MODE:
@@ -105,22 +140,22 @@ func RPCService() {
 	var kasp = keepalive.ServerParameters{
 		//MaxConnectionIdle:     15 * time.Second, // If a client is idle for 15 seconds, send a GOAWAY
 		//MaxConnectionAge:      30 * time.Second, // If any connection is alive for more than 30 seconds, send a GOAWAY
-		MaxConnectionAgeGrace: 5 * time.Minute,  // Allow 5 seconds for pending RPCs to complete before forcibly closing connections
-		Time:                  5 * time.Second,  // Ping the client if it is idle for 5 seconds to ensure the connection is still active
-		Timeout:               1 * time.Second,  // Wait 1 second for the ping ack before assuming the connection is dead
+		MaxConnectionAgeGrace: 5 * time.Minute, // Allow 5 seconds for pending RPCs to complete before forcibly closing connections
+		Time:                  5 * time.Second, // Ping the client if it is idle for 5 seconds to ensure the connection is still active
+		Timeout:               1 * time.Second, // Wait 1 second for the ping ack before assuming the connection is dead
 	}
-	rpc.NewWesternQueenService(util.MASTER_PORT_8003,grpc.KeepaliveEnforcementPolicy(kaep),grpc.KeepaliveParams(kasp))
+	rpc.NewWesternQueenService(util.MASTER_PORT_8003, grpc.KeepaliveEnforcementPolicy(kaep), grpc.KeepaliveParams(kasp))
 	fmt.Println("init RPC Finish")
 }
 
 func RPCClient() {
 
 	var kacp = keepalive.ClientParameters{
-		Time:               2 * time.Minute, // send pings every 10 seconds if there is no activity
-		PermitWithoutStream: true,             // send pings even without active streams
+		Time:                2 * time.Minute, // send pings every 10 seconds if there is no activity
+		PermitWithoutStream: true,            // send pings even without active streams
 	}
 	fmt.Println("init RPCClient!")
-	conn, err := grpc.Dial(fmt.Sprintf("localhost%s", util.MASTER_PORT_8003), grpc.WithInsecure(), grpc.WithBlock(),grpc.WithKeepaliveParams(kacp))
+	conn, err := grpc.Dial(fmt.Sprintf("localhost%s", util.MASTER_PORT_8003), grpc.WithInsecure(), grpc.WithBlock(), grpc.WithKeepaliveParams(kacp))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

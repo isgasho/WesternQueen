@@ -27,6 +27,8 @@ const ProcessBatchSize = 25000
 // 同 traceID 出现位置
 const MaxSpanSplitSize = 20000
 
+// 同时拉取的进程数
+const ParaPull = 100
 // 外部传递
 
 var DEBUG_DATA_SOURCE_PORT = "9971"
