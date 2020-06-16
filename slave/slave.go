@@ -7,6 +7,8 @@ import (
 	"github.com/arcosx/WesternQueen/rpc"
 	"github.com/arcosx/WesternQueen/util"
 	mapset "github.com/deckarep/golang-set"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 	"io"
 	"io/ioutil"
 	"log"
@@ -40,6 +42,7 @@ func Start() {
 	go ReadShareWrongTraceData()
 	// 发送 trace 数据队列
 	go SendTraceData()
+
 	dataSourcePath := getDataSourcePath()
 	if dataSourcePath == "" {
 		fmt.Println("getDataSourcePath failed")
@@ -150,6 +153,18 @@ func SendTraceData() {
 	stream, err := RPCClient.SendTraceDataStream(context.Background())
 	if err != nil {
 		fmt.Println("SendTraceData error", err)
+		var kacp = keepalive.ClientParameters{
+			Time:                2 * time.Minute, // send pings every 10 seconds if there is no activity
+			PermitWithoutStream: true,            // send pings even without active streams
+		}
+		fmt.Println("init RPCClient!")
+		conn, err := grpc.Dial(fmt.Sprintf("localhost%s", util.MASTER_PORT_8003), grpc.WithInsecure(), grpc.WithBlock(), grpc.WithKeepaliveParams(kacp))
+		if err != nil {
+			log.Fatalf("did not connect: %v", err)
+		}
+		defer conn.Close()
+		RPCClient = western_queen.NewWesternQueenClient(conn)
+		stream, err = RPCClient.SendTraceDataStream(context.Background())
 	}
 	for {
 		tmp := <-SendTraceDataCh
@@ -167,7 +182,7 @@ func SendTraceData() {
 
 // 流读取错误信息
 func ReadShareWrongTraceData() {
-	d := time.Microsecond * 10
+	d := time.Microsecond * 100
 
 	t := time.Tick(d)
 
@@ -176,6 +191,19 @@ func ReadShareWrongTraceData() {
 	})
 	if err != nil {
 		fmt.Println("ReadShareWrongTraceData error", err)
+		var kacp = keepalive.ClientParameters{
+			Time:                2 * time.Minute, // send pings every 10 seconds if there is no activity
+			PermitWithoutStream: true,            // send pings even without active streams
+		}
+		fmt.Println("init RPCClient!")
+		conn, err := grpc.Dial(fmt.Sprintf("localhost%s", util.MASTER_PORT_8003), grpc.WithInsecure(), grpc.WithBlock(), grpc.WithKeepaliveParams(kacp))
+		if err != nil {
+			log.Fatalf("did not connect: %v", err)
+		}
+		defer conn.Close()
+		RPCClient = western_queen.NewWesternQueenClient(conn)
+		stream, err = RPCClient.ReadShareWrongTraceData(context.Background(), &western_queen.Empty{
+		})
 	}
 	for {
 		<-t

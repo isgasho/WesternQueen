@@ -57,7 +57,7 @@ func (w *WesternQueenService) SendTraceDataStream(stream WesternQueen_SendTraceD
 			return stream.SendAndClose(new(Empty))
 		}
 		if request != nil {
-			master.ReceiveTraceData(request.TraceId, request.Spans)
+			go master.ReceiveTraceData(request.TraceId, request.Spans)
 		}
 	}
 }

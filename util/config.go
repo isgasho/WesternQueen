@@ -16,8 +16,8 @@ const MASTER_PORT_8002 = ":8002"
 const MASTER_PORT_8003 = ":8003"
 const MASTER_PORT_8004 = ":8004"
 
-const SLAVE_ONE_PORT_8001 = ":8001"
-const SLAVE_TWO_PORT_8002 = ":8002"
+const SLAVE_ONE_PORT_8000 = ":8000"
+const SLAVE_TWO_PORT_8001 = ":8001"
 
 // 程序运行参数
 

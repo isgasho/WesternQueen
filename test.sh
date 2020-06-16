@@ -1,0 +1,1 @@
+java -Dserver.port=9000 -DcheckSumPath=test/checkSum.data -jar test/scoring-1.0-SNAPSHOT.jar

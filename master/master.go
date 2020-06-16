@@ -30,6 +30,7 @@ var slave2Finished bool
 func init() {
 	TraceData = make(util.TraceData)
 	WrongTraceSet = mapset.NewSet()
+	WrongTraceSet.Add("empty")
 	slave1Finished = false
 	slave2Finished = false
 }
