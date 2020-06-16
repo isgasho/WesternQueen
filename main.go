@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"log"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -25,8 +26,10 @@ func main() {
 	envPort := os.Getenv("SERVER_PORT")
 	if envPort == "8000" {
 		util.Mode = util.SLAVE_ONE_MODE
+		runtime.GOMAXPROCS(2)
 	} else if envPort == "8001" {
 		util.Mode = util.SLAVE_TWO_MODE
+		runtime.GOMAXPROCS(2)
 	} else {
 		util.Mode = util.MASTER_MODE
 	}
