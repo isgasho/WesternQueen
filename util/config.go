@@ -28,7 +28,7 @@ const ProcessBatchSize = 25000
 const MaxSpanSplitSize = 20000
 
 // 同时拉取的进程数
-const ParaPull = 10
+const ParaPull = 15
 // 外部传递
 
 var DEBUG_DATA_SOURCE_PORT = "9971"

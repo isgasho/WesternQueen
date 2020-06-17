@@ -4,16 +4,7 @@
 
 ## 运行
 
-* 主节点运行
-```bash
-./WesternQueen  -mode master
-```
-* 从节点运行
-
-```bash
-./WesternQueen  -mode slave1
-./WesternQueen  -mode slave2
-```
+别TM 管怎么运行了
 
 ## 接口流水线
 
@@ -25,7 +16,12 @@
 6. getWrongTrace (master -> slave)
 7. sendCheckSum (master -> 评测程序)
 
-## Docker测评命令
+## 上传到镜像仓库
+
+```bash
+make docker
+```
+## 本地Docker测评命令
 
 ```bash
   docker rm -f scoring backendprocess clientprocess2 clientprocess1
