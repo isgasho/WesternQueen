@@ -3,7 +3,7 @@ package newslave
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	"fmt"
 	"github.com/arcosx/WesternQueen/util"
 	mapset "github.com/deckarep/golang-set"
@@ -171,6 +171,7 @@ func again() {
 
 // 发送自己的错误traceID到master
 func SendWrongTraceSet() {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	jsonStr, err := json.Marshal(WrongTraceSet)
 	if err != nil {
 		fmt.Println("SendWrongTraceSet json.Marshal failed", err)
@@ -202,6 +203,7 @@ func GetShareWrongTraceSet(wrongTraceList []string) {
 
 // 发送全量traceID到master
 func SendFullTraceSet() {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	jsonStr, err := json.Marshal(FullTraceSet)
 	if err != nil {
 		fmt.Println("SendFullTraceSet json.Marshal failed", err)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/arcosx/WesternQueen/newmaster"
@@ -10,6 +9,7 @@ import (
 	"github.com/arcosx/WesternQueen/slave"
 	"github.com/arcosx/WesternQueen/util"
 	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"log"
@@ -72,6 +72,7 @@ func main() {
 		r.POST("/getWrong", func(c *gin.Context) {
 			bytes, _ := c.GetRawData()
 			var WrongTraceList []string
+			var json = jsoniter.ConfigCompatibleWithStandardLibrary
 			err := json.Unmarshal(bytes, &WrongTraceList)
 			if err != nil {
 				fmt.Println("json parse error", err)
@@ -88,6 +89,7 @@ func main() {
 		r.POST("/all", func(c *gin.Context) {
 			bytes, _ := c.GetRawData()
 			var traceList []string
+			var json = jsoniter.ConfigCompatibleWithStandardLibrary
 			err := json.Unmarshal(bytes, &traceList)
 			if err != nil {
 				fmt.Println("json parse error", err)
@@ -107,6 +109,7 @@ func main() {
 		r.POST("/getShare", func(c *gin.Context) {
 			bytes, _ := c.GetRawData()
 			var WrongTraceList []string
+			var json = jsoniter.ConfigCompatibleWithStandardLibrary
 			err := json.Unmarshal(bytes, &WrongTraceList)
 			if err != nil {
 				fmt.Println("json parse error", err)

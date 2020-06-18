@@ -1,10 +1,10 @@
 package master
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/arcosx/WesternQueen/util"
 	mapset "github.com/deckarep/golang-set"
+	jsoniter "github.com/json-iterator/go"
 	md5simd "github.com/minio/md5-simd"
 	"log"
 	"net/http"
@@ -116,6 +116,7 @@ func Start() {
 }
 
 func sendMd5Result() bool {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	result, _ := json.Marshal(traceMd5Map)
 	data := make(url.Values)
 	data.Add("result", util.Bytes2str(result))
