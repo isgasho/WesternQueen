@@ -1,16 +1,17 @@
 package slave
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
 	rpc "github.com/arcosx/WesternQueen/rpc"
 	"github.com/arcosx/WesternQueen/util"
 	"google.golang.org/grpc"
-	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -41,7 +42,7 @@ func TestGetFile(t *testing.T) {
 	res, _ := http.Head("http://localhost:9971/trace1.data1") // 187 MB file of random numbers per line
 	maps := res.Header
 	length, _ := strconv.Atoi(maps["Content-Length"][0]) // Get the content length from the header request
-	limit := 100                                         // 10 Go-routines for the process so each downloads 18.7MB
+	limit := 20                                         // 10 Go-routines for the process so each downloads 18.7MB
 	len_sub := length / limit                            // Bytes for each Go-routine
 	diff := length % limit                               // Get the remaining for the last request
 	for i := 0; i < limit; i++ {
@@ -61,32 +62,60 @@ func TestGetFile(t *testing.T) {
 			req.Header.Add("Range", range_header)
 			resp, _ := client.Do(req)
 			defer resp.Body.Close()
-			bufReader := bufio.NewReader(resp.Body)
-			for {
-				line, err := bufReader.ReadBytes('\n')
-				if err != nil && err != io.EOF {
-					log.Println("bufReader.ReadBytes meet unsolved error")
-					panic(err)
-				}
-				if len(line) == 0 && err == io.EOF {
-					break
-				}
-				//if bytes.Contains(line, []byte("error=1")) {
-				//	firstIndex := bytes.Index(line, []byte("|"))
-				//	if firstIndex == -1 {
-				//		continue
-				//	}
-				//	_ = line[:firstIndex]
-				//}
-				//if bytes.Contains(line, []byte("http.status_code=")) &&
-				//	!bytes.Contains(line, []byte("http.status_code=200")) {
-				//	firstIndex := bytes.Index(line, []byte("|"))
-				//	if firstIndex == -1 {
-				//		continue
-				//	}
-				//	_ = line[:firstIndex]
-				//}
+
+			data, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return
 			}
+			for _, line := range bytes.Split(data, []byte("\n")) {
+				linsStr := util.Bytes2str(line)
+				firstIndex := strings.Index(linsStr, "|")
+				if firstIndex == -1 {
+					continue
+				}
+				_ = line[:firstIndex]
+				if bytes.Contains(line, []byte("error=1")) {
+					firstIndex := bytes.Index(line, []byte("|"))
+					if firstIndex == -1 {
+						continue
+					}
+					_ = line[:firstIndex]
+				}
+				if bytes.Contains(line, []byte("http.status_code=")) &&
+					!bytes.Contains(line, []byte("http.status_code=200")) {
+					firstIndex := bytes.Index(line, []byte("|"))
+					if firstIndex == -1 {
+						continue
+					}
+					_ = line[:firstIndex]
+				}
+			}
+			//bufReader := bufio.NewReader(resp.Body)
+			//for {
+			//	line, err := bufReader.ReadBytes('\n')
+			//	if err != nil && err != io.EOF {
+			//		log.Println("bufReader.ReadBytes meet unsolved error")
+			//		panic(err)
+			//	}
+			//	if len(line) == 0 && err == io.EOF {
+			//		break
+			//	}
+			//	if bytes.Contains(line, []byte("error=1")) {
+			//		firstIndex := bytes.Index(line, []byte("|"))
+			//		if firstIndex == -1 {
+			//			continue
+			//		}
+			//		_ = line[:firstIndex]
+			//	}
+			//	if bytes.Contains(line, []byte("http.status_code=")) &&
+			//		!bytes.Contains(line, []byte("http.status_code=200")) {
+			//		firstIndex := bytes.Index(line, []byte("|"))
+			//		if firstIndex == -1 {
+			//			continue
+			//		}
+			//		_ = line[:firstIndex]
+			//	}
+			//}
 			wg.Done()
 			//          ioutil.WriteFile("new_oct.png", []byte(string(body)), 0x777)
 		}(min, max, i)
